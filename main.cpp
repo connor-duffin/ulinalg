@@ -10,11 +10,15 @@ private:
 
 public:
   Array(int, int);
+  int get_nrow();
+  int get_ncol();
+  std::vector<int> get_vals();
   void set_zeros();
   void set_ones();
   void set_vals(std::vector<int>&);
+  Array bcast(Array&);
+  Array operator+(Array const&);
   void pprint();
-  Array operator+(Array const &obj);
 };
 
 Array::Array(int nrows, int ncols) {
@@ -22,6 +26,15 @@ Array::Array(int nrows, int ncols) {
   ncol = ncols;
   vals = std::vector<int>(nrow * ncol);
 }
+
+// get the number of rows in the array object
+int Array::get_nrow() { return nrow; }
+
+// get the number of cols in the array object
+int Array::get_ncol() { return ncol; }
+
+// get the values from the object
+std::vector<int> Array::get_vals() { return vals; }
 
 void Array::set_zeros() {
   for (auto it = vals.begin(); it != vals.end(); ++it) {
@@ -35,6 +48,24 @@ void Array::set_ones() {
   }
 }
 
+// Set the values of an array from a vector:
+// The values array has to be of the exact same size as expected
+void Array::set_vals(std::vector<int> &values) {
+  int size_in = values.size();
+  int size_out = vals.size();
+
+  if (size_in != size_out) {
+    throw std::invalid_argument(
+      "Input vector dimensions do not match!"
+    );
+  } else {
+    for (int i = 0; i < size_in; ++i) {
+      vals[i] = values[i];
+    }
+  }
+}
+
+// pretty print the output array
 void Array::pprint() {
   for (size_t i = 0; i < vals.size(); ++i) {
     std::cout << vals[i];
@@ -47,23 +78,45 @@ void Array::pprint() {
   }
 }
 
-// Set the values of an array from a vector:
-// The values array has to be of the exact same size as expected
-void Array::set_vals(std::vector<int>& values) {
-  int size_in = values.size();
-  int size_out = vals.size();
+// broadcast the input array to match this array
+// arr.bcast({1}) = {{1, 1, 1, 1}, {1, 1, 1, 1}}
+// we can only broadcast a 2d array if the dimensions match up OK
+// bcast((4x1)) -> 4x4
+// bcast((1x4)) -> 4x4
+Array Array::bcast(Array& input) {
+  // initialize this input array
+  Array res(nrow, ncol);
 
-  if (size_in != size_out) {
-    throw std::invalid_argument("Smaller object not multiple of larger object");
-  } else {
-    // If we get to the end of values, reset to the start
-    for (int i = 0; i < size_in; ++i) {
-      vals[i] = values[i];
+  // store the number of rows/columns, and the values
+  int input_nrow = input.get_nrow();
+  int input_ncol = input.get_ncol();
+  std::vector<int> input_vals = input.get_vals();
+  std::vector<int> input_val_vector(nrow * ncol);
+
+  if (input_nrow == 1 && input_ncol == 1) {
+    // get scalar values, and broadcast to vector
+    int input_val_scalar = input_vals[0];
+
+    for (auto it = input_val_vector.begin(); it != input_val_vector.end();
+         ++it) {
+      *it = input_val_scalar;
     }
+
+  } else if (input_nrow == nrow && input_ncol == 1) {
+    // TODO: fix this as it currently does not work...
+    for (auto i = 0; i < input_val_vector.size(); ++i) {
+      input_val_vector[i] = input_vals[i % input_ncol];
+    }
+  } else if (input_nrow == 1 && input_ncol == ncol) {
+  } else {
+    throw std::invalid_argument("Dimensions prohibit broadcasting");
   }
+
+  res.set_vals(input_val_vector);
+
+  return res;
 }
 
-// Add two arrays together, of the same dimensions
 Array Array::operator+(Array const& summand) {
   // Store result in new object with same dimension as operand
   Array res(nrow, ncol);
@@ -76,10 +129,15 @@ Array Array::operator+(Array const& summand) {
 }
 
 int main() {
-  std::cout << "Initialize 2x4 ones" << std::endl;
+  std::cout << "Ones" << std::endl;
   Array v(5, 1);
   v.set_ones();
   v.pprint();
+
+  std::cout << "Scalar ones" << std::endl;
+  Array x(1, 1);
+  x.set_ones();
+  x.pprint();
 
   std::cout << "Initialize 1:8 matrix" << std::endl;
   std::vector<int> vals = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -87,8 +145,19 @@ int main() {
   u.set_vals(vals);
   u.pprint();
 
-  // std::vector<int> small_vals = {1, 2, 3};
-  // u.set_vals(small_vals);
+  std::cout << "Bcast scalar to matrix" << std::endl;
+  Array x_bcast = u.bcast(x);
+  x_bcast.pprint();
+
+  std::cout << "2x1 ones" << std::endl;
+  Array y(2, 1);
+  vals = {3, 4};
+  y.set_vals(vals);
+  y.pprint();
+
+  std::cout << "Bcast column vector to matrix" << std::endl;
+  Array y_bcast = u.bcast(y);
+  y_bcast.pprint();
 
   std::cout << "Sum of the above results" << std::endl;
   Array w = u + v;
