@@ -5,4 +5,9 @@ project(uLinalg VERSION 0.0.1
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(main main.cpp src/array.cpp)
+# compile the array library
+add_library(array STATIC src/array.cpp)
+
+# add the executable and link it
+add_executable(main main.cpp)
+target_link_libraries(main PUBLIC array)
