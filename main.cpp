@@ -88,8 +88,8 @@ Array Array::bcast(Array& input) {
   Array res(nrow, ncol);
 
   // store the number of rows/columns, and the values
-  int input_nrow = input.get_nrow();
-  int input_ncol = input.get_ncol();
+  unsigned int input_nrow = input.get_nrow();
+  unsigned int input_ncol = input.get_ncol();
   std::vector<int> input_vals = input.get_vals();
   std::vector<int> input_val_vector(nrow * ncol);
 
@@ -105,9 +105,12 @@ Array Array::bcast(Array& input) {
   } else if (input_nrow == nrow && input_ncol == 1) {
     // TODO: fix this as it currently does not work...
     for (auto i = 0; i < input_val_vector.size(); ++i) {
-      input_val_vector[i] = input_vals[i % input_ncol];
+      input_val_vector[i] = input_vals[i / ncol];
     }
   } else if (input_nrow == 1 && input_ncol == ncol) {
+    for (auto i = 0; i < input_val_vector.size(); ++i) {
+      input_val_vector[i] = input_vals[i % ncol];
+    }
   } else {
     throw std::invalid_argument("Dimensions prohibit broadcasting");
   }
@@ -149,7 +152,7 @@ int main() {
   Array x_bcast = u.bcast(x);
   x_bcast.pprint();
 
-  std::cout << "2x1 ones" << std::endl;
+  std::cout << "2x1 to be broadcast" << std::endl;
   Array y(2, 1);
   vals = {3, 4};
   y.set_vals(vals);
@@ -158,6 +161,16 @@ int main() {
   std::cout << "Bcast column vector to matrix" << std::endl;
   Array y_bcast = u.bcast(y);
   y_bcast.pprint();
+
+  std::cout << "1x4 to be broadcast" << std::endl;
+  Array z(1, 4);
+  vals = {3, 4, 5, 6};
+  z.set_vals(vals);
+  z.pprint();
+
+  std::cout << "Bcast row vector to matrix" << std::endl;
+  Array z_bcast = u.bcast(z);
+  z_bcast.pprint();
 
   std::cout << "Sum of the above results" << std::endl;
   Array w = u + v;
