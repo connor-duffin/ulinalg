@@ -22,3 +22,6 @@ target_link_libraries(main PUBLIC array)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+
+# be sure to export the compile commands so clangd works OK
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
