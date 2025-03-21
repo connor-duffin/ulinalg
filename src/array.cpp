@@ -113,5 +113,9 @@ Array Array::operator+(Array const& summand) {
     res.vals[i] = vals[i] + summand.vals[i];
   }
 
-  return(res);
+  return res;
+}
+
+int* Array::operator[](int r) {
+  return &vals[r * ncol];
 }

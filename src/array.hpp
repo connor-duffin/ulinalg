@@ -20,7 +20,9 @@ public:
   void set_vals(std::vector<int>&);
 
   Array bcast(Array&);
+
   Array operator+(Array const &);
+  int* operator[](int r);
 
   void pprint();
 };
