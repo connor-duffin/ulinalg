@@ -69,26 +69,29 @@ void Array::pprint() {
 // bcast((4x1)) -> 4x4
 // bcast((1x4)) -> 4x4
 Array Array::bcast(Array& input) {
-  // initialize this input array
-  Array res(nrow, ncol);
-
   // store the number of rows/columns, and the values
-  unsigned int input_nrow = input.get_nrow();
-  unsigned int input_ncol = input.get_ncol();
-  std::vector<int> input_vals = input.get_vals();
-  std::vector<int> input_val_vector(nrow * ncol);
+  int input_nrow = input.get_nrow();
+  int input_ncol = input.get_ncol();
 
-  if (input_nrow == 1 && input_ncol == 1) {
-    // get scalar values, and broadcast to vector
-    int input_val_scalar = input_vals[0];
+  if (input_nrow == nrow && input_ncol == ncol) {
+    return input;
+  } else {
+    // initialize this input array
+    Array res(nrow, ncol);
 
-    for (auto it = input_val_vector.begin(); it != input_val_vector.end();
-         ++it) {
-      *it = input_val_scalar;
-    }
+    std::vector<int> input_vals = input.get_vals();
+    std::vector<int> input_val_vector(nrow * ncol);
+
+    if (input_nrow == 1 && input_ncol == 1) {
+      // get scalar values, and broadcast to vector
+      int input_val_scalar = input_vals[0];
+
+      for (auto it = input_val_vector.begin(); it != input_val_vector.end();
+           ++it) {
+        *it = input_val_scalar;
+      }
 
   } else if (input_nrow == nrow && input_ncol == 1) {
-    // TODO: fix this as it currently does not work...
     for (auto i = 0; i < input_val_vector.size(); ++i) {
       input_val_vector[i] = input_vals[i / ncol];
     }
@@ -103,14 +106,42 @@ Array Array::bcast(Array& input) {
   res.set_vals(input_val_vector);
 
   return res;
+  }
 }
 
-Array Array::operator+(Array const& summand) {
+Array Array::mult(Array &m) {
+  // compute A = this @ m (= this.mult(m))
+  int nrow_l = nrow;
+  int ncol_l = ncol;
+
+  // right-hand dimensions
+  int nrow_r = m.nrow;
+  int ncol_r = m.ncol;
+
+  if (ncol_l != nrow_r) {
+    throw std::invalid_argument("Dimensions prohibit matrix multiplication");
+  }
+
+  Array res = Array(nrow_l, ncol_r);
+  res.set_zeros();
+
+  for (int i = 0; i < nrow_l; ++i) {
+    for (int j = 0; j < ncol_r; ++j) {
+      for (int k = 0; k < ncol_l; ++k) {
+        res[i][j] += vals[i + nrow_l * k] * m[k][j];
+      }
+    }
+  }
+
+  return res;
+}
+
+Array Array::operator+(Array summand) {
   // Store result in new object with same dimension as operand
-  Array res(nrow, ncol);
+  Array res = bcast(summand);
 
   for (size_t i = 0; i < vals.size(); ++i) {
-    res.vals[i] = vals[i] + summand.vals[i];
+    res.vals[i] += vals[i];
   }
 
   return res;

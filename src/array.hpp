@@ -20,9 +20,13 @@ public:
   void set_vals(std::vector<int>&);
 
   Array bcast(Array&);
+  Array mult(Array&);
 
-  Array operator+(Array const &);
-  int* operator[](int r);
+  Array operator+(Array);
+  // Array operator-(Array);
+  // Array operator*(Array);
+  // Array operator/(Array);
+  int *operator[](int r);
 
   void pprint();
 };

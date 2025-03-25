@@ -1,5 +1,6 @@
 #include "../src/array.hpp"
 
+#include <cstddef>
 #include <vector>
 #include <catch2/catch_test_macros.hpp>
 
@@ -37,7 +38,7 @@ TEST_CASE("Array broadcasting works", "[array]") {
   Array x(1, 1);
   x.set_ones();
 
-  // Initialize 1:8 matrix
+  // Initialize matrix
   std::vector<int> vals = {1, 2, 3, 4, 5, 6, 7, 8};
   Array u(2, 4);
   u.set_vals(vals);
@@ -86,4 +87,34 @@ TEST_CASE("Array broadcasting works", "[array]") {
   }
 }
 
-// TODO: write test for addition *with* broadcasting
+TEST_CASE("Addition with broadcasting works as expected", "[array]") {
+  std::vector<int> vals = {1, 2, 3, 4, 5, 6, 7, 8};
+  Array u(2, 4);
+  u.set_vals(vals);
+
+  Array z(1, 1);
+  z.set_ones();
+
+  Array upp = u + z;
+  std::vector<int> valspp = upp.get_vals();
+  for (size_t i = 0; i < valspp.size(); ++i) {
+    REQUIRE(valspp[i] == (vals[i] + 1));
+  }
+}
+
+TEST_CASE("Matrix multiplication works as expected", "[array]") {
+  Array u(2, 4);
+  u.set_ones();
+
+  Array v(4, 2);
+  v.set_ones();
+
+  Array res = u.mult(v);
+  REQUIRE(res.get_nrow() == 2);
+  REQUIRE(res.get_ncol() == 2);
+
+  std::vector<int> vals = res.get_vals();
+  for (int i = 0; i < vals.size(); ++i) {
+    REQUIRE(vals[i] == 4);
+  }
+}
