@@ -19,7 +19,6 @@ public:
   void set_ones();
   void set_vals(std::vector<int>&);
 
-  Array bcast(Array&);
   Array mult(Array&);
 
   Array operator+(Array);
@@ -30,5 +29,8 @@ public:
 
   void pprint();
 };
+
+// broadcast function should be separate for symmetry purposes
+Array bcast(Array &input, int nrow, int ncol);
 
 #endif

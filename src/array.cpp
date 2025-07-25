@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 // Array class initialization
 Array::Array(int nrows, int ncols) {
@@ -63,12 +64,90 @@ void Array::pprint() {
   }
 }
 
+Array Array::mult(Array &m) {
+  // compute A = this @ m (= this.mult(m))
+  int nrow_l = nrow;
+  int ncol_l = ncol;
+
+  // right-hand dimensions
+  int nrow_r = m.nrow;
+  int ncol_r = m.ncol;
+
+  if (ncol_l != nrow_r) {
+    throw std::invalid_argument("Dimensions prohibit matrix multiplication");
+  }
+
+  Array res = Array(nrow_l, ncol_r);
+  res.set_zeros();
+
+  for (int i = 0; i < nrow_l; ++i) {
+    for (int j = 0; j < ncol_r; ++j) {
+      for (int k = 0; k < ncol_l; ++k) {
+        res[i][j] += vals[i + nrow_l * k] * m[k][j];
+      }
+    }
+  }
+
+  return res;
+}
+
+Array Array::operator+(Array summand) {
+    int ncol_right = summand.get_ncol();
+    int ncol_left = get_ncol();
+
+    int nrow_right = summand.get_nrow();
+    int nrow_left = get_nrow();
+
+    int ncol_out = 1;
+    int nrow_out = 1;
+
+    // As in numpy: check right to left (columns then rows)
+    // First check across the column counts
+    if (ncol_right == ncol_left) {
+        ncol_out = ncol_right;
+    } else if (ncol_left == 1) {
+        ncol_out = ncol_right;
+    } else if (ncol_right == 1) {
+        ncol_out = ncol_left;
+    } else {
+        throw std::invalid_argument("Columns prohibit broadcasting");
+    }
+
+    // Now check along the rows
+    if (nrow_right == nrow_left) {
+        nrow_out = nrow_right;
+    } else if (nrow_right == 1) {
+        nrow_out = nrow_right;
+    } else if (nrow_right == 1) {
+        nrow_out = nrow_left;
+    } else {
+        throw std::invalid_argument("Rows prohibit broadcasting");
+    }
+
+    // Initialize our output
+    Array res(nrow_out, ncol_out);
+    res.set_ones();
+    std::vector<int> vals = res.get_vals();
+
+    // Set the values of the sum
+    for (size_t i = 0; i < vals.size(); ++i) {
+        res.vals[i] = vals[i];
+    }
+
+    return res;
+}
+
+int* Array::operator[](int r) {
+  return &vals[r * ncol];
+}
+
+
 // broadcast the input array to match this array
 // arr.bcast({1}) = {{1, 1, 1, 1}, {1, 1, 1, 1}}
 // we can only broadcast a 2d array if the dimensions match up OK
 // bcast((4x1)) -> 4x4
 // bcast((1x4)) -> 4x4
-Array Array::bcast(Array& input) {
+Array bcast(Array& input, int nrow, int ncol) {
   // store the number of rows/columns, and the values
   int input_nrow = input.get_nrow();
   int input_ncol = input.get_ncol();
@@ -109,44 +188,3 @@ Array Array::bcast(Array& input) {
   }
 }
 
-Array Array::mult(Array &m) {
-  // compute A = this @ m (= this.mult(m))
-  int nrow_l = nrow;
-  int ncol_l = ncol;
-
-  // right-hand dimensions
-  int nrow_r = m.nrow;
-  int ncol_r = m.ncol;
-
-  if (ncol_l != nrow_r) {
-    throw std::invalid_argument("Dimensions prohibit matrix multiplication");
-  }
-
-  Array res = Array(nrow_l, ncol_r);
-  res.set_zeros();
-
-  for (int i = 0; i < nrow_l; ++i) {
-    for (int j = 0; j < ncol_r; ++j) {
-      for (int k = 0; k < ncol_l; ++k) {
-        res[i][j] += vals[i + nrow_l * k] * m[k][j];
-      }
-    }
-  }
-
-  return res;
-}
-
-Array Array::operator+(Array summand) {
-  // Store result in new object with same dimension as operand
-  Array res = bcast(summand);
-
-  for (size_t i = 0; i < vals.size(); ++i) {
-    res.vals[i] += vals[i];
-  }
-
-  return res;
-}
-
-int* Array::operator[](int r) {
-  return &vals[r * ncol];
-}
