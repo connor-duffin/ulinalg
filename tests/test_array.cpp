@@ -1,8 +1,8 @@
 #include "../src/array.hpp"
 
+#include <catch2/catch_test_macros.hpp>
 #include <cstddef>
 #include <vector>
-#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Basic array operations work", "[array]") {
   Array a(2, 3);
@@ -85,6 +85,29 @@ TEST_CASE("Array broadcasting works", "[array]") {
   for (size_t i = 0; i < z_vals.size(); ++i) {
     REQUIRE(z_vals[i] == vals[i % 4]);
   }
+}
+
+TEST_CASE("More intricate broadcasting", "[array]") {
+    Array x(4, 2);
+    std::vector<int> vals = {1, 2, 3, 4, 5, 6, 7, 8};
+    x.set_vals(vals);
+
+    Array z(1, 2);
+    vals = {10, 10};
+    z.set_vals(vals);
+
+    // broadcast along the proper dimensions
+    Array z_bcast = x.bcast(z);
+    int nrow = z_bcast.get_nrow();
+    int ncol = z_bcast.get_ncol();
+    REQUIRE(nrow == 4);
+    REQUIRE(ncol == 2);
+
+    // make sure that all values are equal
+    std::vector<int> z_vals = z_bcast.get_vals();
+    for (size_t i = 0; i < z_vals.size(); ++i) {
+        REQUIRE(z_vals[i] == 10);
+    }
 }
 
 TEST_CASE("Addition with broadcasting works as expected", "[array]") {
