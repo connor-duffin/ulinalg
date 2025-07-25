@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.15...3.31)
-project(uLinalg VERSION 0.0.1
+project(uLinalg VERSION 0.0.0.9
                 DESCRIPTION "A Micro 2D array library"
                 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# add testing support for this build,
-# setting BUILD_TESTING = TRUE
+# add testing support for this build, automatically
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   include(CTest)
+  set(BUILD_TESTING ON)
 endif()
 
 # compile the array library
