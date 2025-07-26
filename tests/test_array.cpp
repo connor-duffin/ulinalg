@@ -34,6 +34,52 @@ TEST_CASE("Basic array operations work", "[array]") {
   REQUIRE(v[5] == 5);
 }
 
+TEST_CASE("Matrix multiplication works as expected", "[array]") {
+  Array u(2, 4);
+  u.set_ones();
+
+  Array v(4, 2);
+  v.set_ones();
+
+  Array res = u.mult(v);
+  REQUIRE(res.get_nrow() == 2);
+  REQUIRE(res.get_ncol() == 2);
+
+  std::vector<int> vals = res.get_vals();
+  for (int i = 0; i < vals.size(); ++i) {
+    REQUIRE(vals[i] == 4);
+  }
+}
+
+TEST_CASE("Addition with broadcasting works as expected", "[array]") {
+  std::vector<int> vals = {1, 2, 3, 4, 5, 6, 7, 8};
+  Array u(2, 4);
+  u.set_vals(vals);
+
+  Array z(1, 4);
+  z.set_ones();
+
+  Array upp = u + z;
+  std::vector<int> valspp = upp.get_vals();
+  for (size_t i = 0; i < valspp.size(); ++i) {
+    REQUIRE(valspp[i] == (vals[i] + 1));
+  }
+}
+
+TEST_CASE("Checking that broadcast addition is symmetric", "[array]") {
+  std::vector<int> vals = {1, 2, 3};
+  Array u(1, 3);
+  u.set_vals(vals);
+  Array v(3, 1);
+  v.set_vals(vals);
+
+  Array out = u + v;
+  std::vector<int> vals_true = {2, 3, 4, 3, 4, 5, 4, 5, 6};
+  REQUIRE(out.get_vals() == vals_true);
+
+  Array out_sym = v + u;
+  REQUIRE(out_sym.get_vals() == vals_true);
+}
 TEST_CASE("Array broadcasting works", "[array]") {
   // Scalar ones
   Array x(1, 1);
@@ -92,51 +138,4 @@ TEST_CASE("More intricate broadcasting", "[array]") {
   for (size_t i = 0; i < z_vals.size(); ++i) {
     REQUIRE(z_vals[i] == 10);
   }
-}
-
-TEST_CASE("Matrix multiplication works as expected", "[array]") {
-  Array u(2, 4);
-  u.set_ones();
-
-  Array v(4, 2);
-  v.set_ones();
-
-  Array res = u.mult(v);
-  REQUIRE(res.get_nrow() == 2);
-  REQUIRE(res.get_ncol() == 2);
-
-  std::vector<int> vals = res.get_vals();
-  for (int i = 0; i < vals.size(); ++i) {
-    REQUIRE(vals[i] == 4);
-  }
-}
-
-TEST_CASE("Addition with broadcasting works as expected", "[array]") {
-  std::vector<int> vals = {1, 2, 3, 4, 5, 6, 7, 8};
-  Array u(2, 4);
-  u.set_vals(vals);
-
-  Array z(1, 4);
-  z.set_ones();
-
-  Array upp = u + z;
-  std::vector<int> valspp = upp.get_vals();
-  for (size_t i = 0; i < valspp.size(); ++i) {
-    REQUIRE(valspp[i] == (vals[i] + 1));
-  }
-}
-
-TEST_CASE("Checking that broadcast addition is symmetric", "[array]") {
-  std::vector<int> vals = {1, 2, 3};
-  Array u(1, 3);
-  u.set_vals(vals);
-  Array v(3, 1);
-  v.set_vals(vals);
-
-  Array out = u + v;
-  std::vector<int> vals_true = {2, 3, 4, 3, 4, 5, 4, 5, 6};
-  REQUIRE(out.get_vals() == vals_true);
-
-  Array out_sym = v + u;
-  REQUIRE(out_sym.get_vals() == vals_true);
 }

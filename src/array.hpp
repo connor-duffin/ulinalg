@@ -11,8 +11,8 @@ private:
 
 public:
   Array(int, int);
-  int get_nrow();
-  int get_ncol();
+  int get_nrow() const;
+  int get_ncol() const;
   std::vector<int> get_vals();
 
   void set_zeros();

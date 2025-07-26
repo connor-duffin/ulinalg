@@ -12,10 +12,10 @@ Array::Array(int nrows, int ncols) {
 }
 
 // Get the number of rows in the array object
-int Array::get_nrow() { return nrow; }
+int Array::get_nrow() const { return nrow; }
 
 // Get the number of cols in the array object
-int Array::get_ncol() { return ncol; }
+int Array::get_ncol() const { return ncol; }
 
 // Get the values from the object
 std::vector<int> Array::get_vals() { return vals; }
