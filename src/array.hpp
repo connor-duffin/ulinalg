@@ -17,9 +17,9 @@ public:
 
   void set_zeros();
   void set_ones();
-  void set_vals(std::vector<int>&);
+  void set_vals(std::vector<int> &);
 
-  Array mult(Array&);
+  Array mult(Array &);
 
   Array operator+(Array);
   // Array operator-(Array);
@@ -33,4 +33,6 @@ public:
 // broadcast function should be separate for symmetry purposes
 Array bcast(Array &input, int nrow, int ncol);
 
+std::vector<int> get_bcast_idx(int nrow_in, int ncol_in, int nrow_out,
+                               int ncol_out);
 #endif

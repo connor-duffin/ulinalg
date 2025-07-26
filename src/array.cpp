@@ -41,9 +41,7 @@ void Array::set_vals(std::vector<int> &values) {
   int size_out = vals.size();
 
   if (size_in != size_out) {
-    throw std::invalid_argument(
-      "Input vector dimensions do not match!"
-    );
+    throw std::invalid_argument("Input vector dimensions do not match!");
   } else {
     for (int i = 0; i < size_in; ++i) {
       vals[i] = values[i];
@@ -91,68 +89,64 @@ Array Array::mult(Array &m) {
   return res;
 }
 
+// TODO: add ability to do this in place if dimensions allow for it
 Array Array::operator+(Array summand) {
-    int ncol_right = summand.get_ncol();
-    int ncol_left = get_ncol();
+  int ncol_right = summand.get_ncol();
+  int ncol_left = get_ncol();
 
-    int nrow_right = summand.get_nrow();
-    int nrow_left = get_nrow();
+  int nrow_right = summand.get_nrow();
+  int nrow_left = get_nrow();
 
-    int ncol_out = 1;
-    int nrow_out = 1;
+  int ncol_out;
+  int nrow_out;
 
-    // As in numpy: check right to left (columns then rows)
-    // First check across the column counts
-    if (ncol_right == ncol_left) {
-        ncol_out = ncol_right;
-    } else if (ncol_left == 1) {
-        ncol_out = ncol_right;
-    } else if (ncol_right == 1) {
-        ncol_out = ncol_left;
-    } else {
-        throw std::invalid_argument("Columns prohibit broadcasting");
-    }
+  // Get the output columns
+  if (ncol_right == ncol_left) {
+    ncol_out = ncol_right;
+  } else if (ncol_left == 1) {
+    ncol_out = ncol_right;
+  } else if (ncol_right == 1) {
+    ncol_out = ncol_left;
+  } else {
+    throw std::invalid_argument("Columns prohibit broadcasting");
+  }
 
-    // Now check along the rows
-    if (nrow_right == nrow_left) {
-        nrow_out = nrow_right;
-    } else if (nrow_right == 1) {
-        nrow_out = nrow_right;
-    } else if (nrow_right == 1) {
-        nrow_out = nrow_left;
-    } else {
-        throw std::invalid_argument("Rows prohibit broadcasting");
-    }
+  // Get the output rows
+  if (nrow_right == nrow_left) {
+    nrow_out = nrow_right;
+  } else if (nrow_left == 1) {
+    nrow_out = nrow_right;
+  } else if (nrow_right == 1) {
+    nrow_out = nrow_left;
+  } else {
+    throw std::invalid_argument("Rows prohibit broadcasting");
+  }
 
-    // Initialize our output
-    Array res(nrow_out, ncol_out);
-    res.set_ones();
-    std::vector<int> vals = res.get_vals();
+  std::cout << "Left bcasting" << nrow_out << ncol_out << std::endl;
+  std::vector<int> left_idx =
+      get_bcast_idx(nrow_left, ncol_left, nrow_out, ncol_out);
 
-    // Set the values of the sum
-    for (size_t i = 0; i < vals.size(); ++i) {
-        res.vals[i] = vals[i];
-    }
+  std::cout << "Right bcasting" << std::endl;
+  std::vector<int> right_idx =
+      get_bcast_idx(nrow_right, ncol_right, nrow_out, ncol_out);
 
-    return res;
+  // Set the return Array
+  Array res(nrow_out, ncol_out);
+  for (size_t i = 0; i < nrow_out * ncol_out; ++i) {
+    res.vals[i] = vals[left_idx[i]] + summand.vals[right_idx[i]];
+  }
+
+  return res;
 }
 
-int* Array::operator[](int r) {
-  return &vals[r * ncol];
-}
+int *Array::operator[](int r) { return &vals[r * ncol]; }
 
-
-// broadcast the input array to match this array
-// arr.bcast({1}) = {{1, 1, 1, 1}, {1, 1, 1, 1}}
-// we can only broadcast a 2d array if the dimensions match up OK
-// bcast((4x1)) -> 4x4
-// bcast((1x4)) -> 4x4
-Array bcast(Array& input, int nrow, int ncol) {
+Array bcast(Array &input, int nrow, int ncol) {
   // store the number of rows/columns, and the values
-  int input_nrow = input.get_nrow();
-  int input_ncol = input.get_ncol();
+  int nrow_in = input.get_nrow();
+  int ncol_in = input.get_ncol();
 
-  if (input_nrow == nrow && input_ncol == ncol) {
+  if (nrow_in == nrow && ncol_in == ncol) {
     return input;
   } else {
     // initialize this input array
@@ -160,31 +154,40 @@ Array bcast(Array& input, int nrow, int ncol) {
 
     std::vector<int> input_vals = input.get_vals();
     std::vector<int> input_val_vector(nrow * ncol);
+    std::vector<int> idx_bcast = get_bcast_idx(nrow_in, ncol_in, nrow, ncol);
 
-    if (input_nrow == 1 && input_ncol == 1) {
-      // get scalar values, and broadcast to vector
-      int input_val_scalar = input_vals[0];
-
-      for (auto it = input_val_vector.begin(); it != input_val_vector.end();
-           ++it) {
-        *it = input_val_scalar;
-      }
-
-  } else if (input_nrow == nrow && input_ncol == 1) {
     for (auto i = 0; i < input_val_vector.size(); ++i) {
-      input_val_vector[i] = input_vals[i / ncol];
+      input_val_vector[i] = input_vals[idx_bcast[i]];
     }
-  } else if (input_nrow == 1 && input_ncol == ncol) {
-    for (auto i = 0; i < input_val_vector.size(); ++i) {
-      input_val_vector[i] = input_vals[i % ncol];
+    res.set_vals(input_val_vector);
+
+    return res;
+  }
+}
+
+std::vector<int> get_bcast_idx(int nrow_in, int ncol_in, int nrow_out,
+                               int ncol_out) {
+  int n_elements = nrow_out * ncol_out;
+  std::vector<int> idx(n_elements);
+  if (nrow_in == nrow_out && ncol_in == ncol_out) {
+    for (int i = 0; i < n_elements; ++i) {
+      idx[i] = i;
+    }
+  } else if (nrow_in == 1 && ncol_in == 1) {
+    for (int i = 0; i < n_elements; ++i) {
+      idx[i] = 0;
+    }
+  } else if (nrow_in == nrow_out && ncol_in == 1) {
+    for (int i = 0; i < n_elements; ++i) {
+      idx[i] = i / ncol_out;
+    }
+  } else if (nrow_in == 1 && ncol_in == ncol_out) {
+    for (int i = 0; i < n_elements; ++i) {
+      idx[i] = i % ncol_out;
     }
   } else {
     throw std::invalid_argument("Dimensions prohibit broadcasting");
   }
 
-  res.set_vals(input_val_vector);
-
-  return res;
-  }
+  return idx;
 }
-

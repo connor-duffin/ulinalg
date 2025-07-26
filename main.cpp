@@ -20,29 +20,17 @@ int main() {
   u.set_vals(vals);
   u.pprint();
 
-  std::cout << "Bcast scalar to matrix" << std::endl;
-  Array x_bcast = u.bcast(x);
-  x_bcast.pprint();
-
   std::cout << "2x1 to be broadcast" << std::endl;
   Array y(2, 1);
   vals = {3, 4};
   y.set_vals(vals);
   y.pprint();
 
-  std::cout << "Bcast column vector to matrix" << std::endl;
-  Array y_bcast = u.bcast(y);
-  y_bcast.pprint();
-
   std::cout << "1x4 to be broadcast" << std::endl;
   Array z(1, 4);
   vals = {3, 4, 5, 6};
   z.set_vals(vals);
   z.pprint();
-
-  std::cout << "Bcast row vector to matrix" << std::endl;
-  Array z_bcast = u.bcast(z);
-  z_bcast.pprint();
 
   std::cout << "Sum of the above results" << std::endl;
   Array w = u + v;
