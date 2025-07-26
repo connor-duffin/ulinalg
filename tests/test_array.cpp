@@ -80,13 +80,14 @@ TEST_CASE("Checking that broadcast addition is symmetric", "[array]") {
   Array out_sym = v + u;
   REQUIRE(out_sym.get_vals() == vals_true);
 }
+
 TEST_CASE("Array broadcasting works", "[array]") {
   // Scalar ones
   Array x(1, 1);
   x.set_ones();
 
   // bcast scalar to 2x4 matrix
-  Array x_bcast = bcast(x, 2, 4);
+  Array x_bcast = array_detail::bcast(x, 2, 4);
   REQUIRE(x_bcast.get_nrow() == 2);
   REQUIRE(x_bcast.get_ncol() == 4);
 
@@ -99,7 +100,7 @@ TEST_CASE("Array broadcasting works", "[array]") {
   Array y(2, 1);
   std::vector<int> vals = {3, 4};
   y.set_vals(vals);
-  Array y_bcast = bcast(y, 2, 4);
+  Array y_bcast = array_detail::bcast(y, 2, 4);
   REQUIRE(y_bcast.get_nrow() == 2);
   REQUIRE(y_bcast.get_ncol() == 4);
   std::vector<int> y_vals = y_bcast.get_vals();
@@ -115,7 +116,7 @@ TEST_CASE("Array broadcasting works", "[array]") {
 
   // 1x4 to be broadcast
   Array z(1, 4);
-  Array z_bcast = bcast(z, 2, 4);
+  Array z_bcast = array_detail::bcast(z, 2, 4);
   std::vector<int> z_vals = z_bcast.get_vals();
   REQUIRE(z_bcast.get_nrow() == 2);
   REQUIRE(z_bcast.get_ncol() == 4);
@@ -127,7 +128,7 @@ TEST_CASE("More intricate broadcasting", "[array]") {
   z.set_vals(vals);
 
   // broadcast along the proper dimensions
-  Array z_bcast = bcast(z, 4, 2);
+  Array z_bcast = array_detail::bcast(z, 4, 2);
   int nrow = z_bcast.get_nrow();
   int ncol = z_bcast.get_ncol();
   REQUIRE(nrow == 4);

@@ -124,11 +124,11 @@ Array Array::operator+(Array summand) {
 
   std::cout << "Left bcasting" << nrow_out << ncol_out << std::endl;
   std::vector<int> left_idx =
-      get_bcast_idx(nrow_left, ncol_left, nrow_out, ncol_out);
+    array_detail::get_bcast_idx(nrow_left, ncol_left, nrow_out, ncol_out);
 
   std::cout << "Right bcasting" << std::endl;
   std::vector<int> right_idx =
-      get_bcast_idx(nrow_right, ncol_right, nrow_out, ncol_out);
+    array_detail::get_bcast_idx(nrow_right, ncol_right, nrow_out, ncol_out);
 
   // Set the return Array
   Array res(nrow_out, ncol_out);
@@ -141,7 +141,7 @@ Array Array::operator+(Array summand) {
 
 int *Array::operator[](int r) { return &vals[r * ncol]; }
 
-Array bcast(Array &input, int nrow, int ncol) {
+Array array_detail::bcast(Array &input, int nrow, int ncol) {
   // store the number of rows/columns, and the values
   int nrow_in = input.get_nrow();
   int ncol_in = input.get_ncol();
@@ -165,8 +165,8 @@ Array bcast(Array &input, int nrow, int ncol) {
   }
 }
 
-std::vector<int> get_bcast_idx(int nrow_in, int ncol_in, int nrow_out,
-                               int ncol_out) {
+std::vector<int> array_detail::get_bcast_idx(int nrow_in, int ncol_in,
+                                             int nrow_out, int ncol_out) {
   int n_elements = nrow_out * ncol_out;
   std::vector<int> idx(n_elements);
   if (nrow_in == nrow_out && ncol_in == ncol_out) {
