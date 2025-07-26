@@ -17,6 +17,7 @@ public:
 
   void set_zeros();
   void set_ones();
+  void eye();
   void set_vals(std::vector<int> &);
 
   Array mult(Array &);
@@ -30,9 +31,10 @@ public:
   void pprint();
 };
 
-// broadcast function should be separate for symmetry purposes
+namespace array_detail {
 Array bcast(Array &input, int nrow, int ncol);
-
 std::vector<int> get_bcast_idx(int nrow_in, int ncol_in, int nrow_out,
                                int ncol_out);
+} // namespace array_detail
+
 #endif

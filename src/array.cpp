@@ -34,6 +34,15 @@ void Array::set_ones() {
   }
 }
 
+// TODO: write tests for this
+// Set the elements to have ones along the main diagonal
+void Array::eye() {
+  set_zeros();
+  for (int i = 0; i < nrow; ++i) {
+    vals[i * (1 + ncol)] = 1;
+  }
+}
+
 // Set the values of an array from a vector:
 // The values array has to be of the exact same size as expected
 void Array::set_vals(std::vector<int> &values) {
