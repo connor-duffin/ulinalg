@@ -90,7 +90,7 @@ Array Array::mult(Array &m) {
   for (int i = 0; i < nrow_l; ++i) {
     for (int j = 0; j < ncol_r; ++j) {
       for (int k = 0; k < ncol_l; ++k) {
-        res[i][j] += vals[i + nrow_l * k] * m[k][j];
+        res[i][j] += vals[ncol_l * i + k] * m[k][j];
       }
     }
   }

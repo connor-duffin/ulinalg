@@ -34,23 +34,6 @@ TEST_CASE("Basic array operations work", "[array]") {
   REQUIRE(v[5] == 5);
 }
 
-TEST_CASE("Matrix multiplication works as expected", "[array]") {
-  Array u(2, 4);
-  u.set_ones();
-
-  Array v(4, 2);
-  v.set_ones();
-
-  Array res = u.mult(v);
-  REQUIRE(res.get_nrow() == 2);
-  REQUIRE(res.get_ncol() == 2);
-
-  std::vector<int> vals = res.get_vals();
-  for (int i = 0; i < vals.size(); ++i) {
-    REQUIRE(vals[i] == 4);
-  }
-}
-
 TEST_CASE("Addition with broadcasting works as expected", "[array]") {
   std::vector<int> vals = {1, 2, 3, 4, 5, 6, 7, 8};
   Array u(2, 4);
@@ -139,4 +122,144 @@ TEST_CASE("More intricate broadcasting", "[array]") {
   for (size_t i = 0; i < z_vals.size(); ++i) {
     REQUIRE(z_vals[i] == 10);
   }
+}
+
+TEST_CASE("Matrix multiplication works as expected", "[array][mult]") {
+  Array u(2, 4);
+  u.set_ones();
+
+  Array v(4, 2);
+  v.set_ones();
+
+  Array res = u.mult(v);
+  REQUIRE(res.get_nrow() == 2);
+  REQUIRE(res.get_ncol() == 2);
+
+  std::vector<int> vals = res.get_vals();
+  for (int i = 0; i < vals.size(); ++i) {
+    REQUIRE(vals[i] == 4);
+  }
+}
+
+TEST_CASE("Matrix multiplication: 2x2 * 2x2", "[array][mult]") {
+  Array A(2, 2);
+  Array B(2, 2);
+
+  // A = [[1, 2], [3, 4]]
+  A.set_vals({1, 2, 3, 4});
+  // B = [[5, 6], [7, 8]]
+  B.set_vals({5, 6, 7, 8});
+
+  // Expected: [[1*5+2*7, 1*6+2*8], [3*5+4*7, 3*6+4*8]] = [[19, 22], [43, 50]]
+  Array C = A.mult(B);
+  std::vector<int> expected = {19, 22, 43, 50};
+  REQUIRE(C.get_vals() == expected);
+}
+
+TEST_CASE("Matrix multiplication: 2x3 * 3x2", "[array][mult]") {
+  Array A(2, 3);
+  Array B(3, 2);
+
+  // A = [[1, 2, 3], [4, 5, 6]]
+  A.set_vals({1, 2, 3, 4, 5, 6});
+  // B = [[7, 8], [9, 10], [11, 12]]
+  B.set_vals({7, 8, 9, 10, 11, 12});
+
+  // Expected:
+  // [[1*7 + 2*9 + 3*11, 1*8 + 2*10 + 3*12],
+  //  [4*7 + 5*9 + 6*11, 4*8 + 5*10 + 6*12]]
+  // = [[58, 64], [139, 154]]
+  Array C = A.mult(B);
+  std::vector<int> expected = {58, 64, 139, 154};
+  REQUIRE(C.get_vals() == expected);
+}
+
+TEST_CASE("Matrix multiplication throws on incompatible sizes",
+          "[array][mult]") {
+  Array A(2, 3);
+  Array B(2, 2);
+  A.set_vals({1, 2, 3, 4, 5, 6});
+  B.set_vals({1, 2, 3, 4});
+
+  REQUIRE_THROWS_AS(A.mult(B), std::invalid_argument);
+}
+
+TEST_CASE("Matrix multiplication: 1x3 * 3x1 (dot product as 1x1 matrix)",
+          "[array][mult]") {
+  Array A(1, 3);
+  Array B(3, 1);
+
+  // A = [[1, 2, 3]]
+  A.set_vals({1, 2, 3});
+  // B = [[4], [5], [6]]
+  B.set_vals({4, 5, 6});
+
+  // Expected: [[1*4 + 2*5 + 3*6]] = [[32]]
+  Array C = A.mult(B);
+  std::vector<int> expected = {32};
+  REQUIRE(C.get_vals() == expected);
+}
+
+TEST_CASE("Matrix multiplication: identity matrix", "[array][mult]") {
+  Array A(2, 2);
+  Array I(2, 2);
+
+  // A = [[9, 8], [7, 6]]
+  A.set_vals({9, 8, 7, 6});
+  // I = [[1, 0], [0, 1]]
+  I.set_vals({1, 0, 0, 1});
+
+  Array C = A.mult(I);
+  REQUIRE(C.get_vals() == A.get_vals());
+}
+
+TEST_CASE("Array::eye() sets ones along the main diagonal for square matrix",
+          "[array][eye]") {
+  Array arr(3, 3);
+  arr.eye();
+
+  std::vector<int> expected = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  REQUIRE(arr.get_vals() == expected);
+}
+
+TEST_CASE("Array::eye() sets diagonal for rectangular tall matrix",
+          "[array][eye]") {
+  Array arr(4, 3);
+  arr.eye();
+
+  std::vector<int> expected = {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0};
+  REQUIRE(arr.get_vals() == expected);
+}
+
+TEST_CASE("Array::eye() sets diagonal for rectangular wide matrix",
+          "[array][eye]") {
+  Array arr(2, 4);
+  arr.eye();
+
+  std::vector<int> expected = {1, 0, 0, 0, 0, 1, 0, 0};
+  REQUIRE(arr.get_vals() == expected);
+}
+
+TEST_CASE("Array::eye() works for 1x1 matrix", "[array][eye]") {
+  Array arr(1, 1);
+  arr.eye();
+
+  std::vector<int> expected = {1};
+  REQUIRE(arr.get_vals() == expected);
+}
+
+TEST_CASE("Array::eye() works for 1xN matrix", "[array][eye]") {
+  Array arr(1, 5);
+  arr.eye();
+
+  std::vector<int> expected = {1, 0, 0, 0, 0};
+  REQUIRE(arr.get_vals() == expected);
+}
+
+TEST_CASE("Array::eye() works for Nx1 matrix", "[array][eye]") {
+  Array arr(4, 1);
+  arr.eye();
+
+  std::vector<int> expected = {1, 0, 0, 0};
+  REQUIRE(arr.get_vals() == expected);
 }
