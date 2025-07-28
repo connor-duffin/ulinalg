@@ -148,6 +148,14 @@ Array Array::operator+(Array summand) {
   return res;
 }
 
+// Allow for indexing operations e.g. a[1][2]
+// It works by first returning a pointer which starts at the specified row; we
+// the slice this row as required, to get our value. Arithmetically:
+//
+// a[i][j] === &vals[i * ncol][j] === *(&vals[i * ncol] + 2)
+//
+// This works because of the way pointer arithmetic works in C++:
+// x[10] === *(x + 10) ==== *(10 + x) === 10[x] (!)
 int *Array::operator[](int r) { return &vals[r * ncol]; }
 
 Array array_detail::bcast(Array &input, int nrow, int ncol) {
