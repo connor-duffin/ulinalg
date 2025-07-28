@@ -18,7 +18,7 @@ public:
   void set_zeros();
   void set_ones();
   void eye();
-  void set_vals(std::vector<int> &);
+  void set_vals(std::vector<int>);
 
   Array mult(Array &);
 

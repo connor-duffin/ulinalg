@@ -34,7 +34,7 @@ TEST_CASE("Basic array operations work", "[array]") {
   REQUIRE(v[5] == 5);
 }
 
-TEST_CASE("Addition with broadcasting works as expected", "[array]") {
+TEST_CASE("Addition with broadcasting works as expected", "[array][add]") {
   std::vector<int> vals = {1, 2, 3, 4, 5, 6, 7, 8};
   Array u(2, 4);
   u.set_vals(vals);
@@ -49,7 +49,7 @@ TEST_CASE("Addition with broadcasting works as expected", "[array]") {
   }
 }
 
-TEST_CASE("Checking that broadcast addition is symmetric", "[array]") {
+TEST_CASE("Checking that broadcast addition is symmetric", "[array][add]") {
   std::vector<int> vals = {1, 2, 3};
   Array u(1, 3);
   u.set_vals(vals);
@@ -64,7 +64,7 @@ TEST_CASE("Checking that broadcast addition is symmetric", "[array]") {
   REQUIRE(out_sym.get_vals() == vals_true);
 }
 
-TEST_CASE("Array broadcasting works", "[array]") {
+TEST_CASE("Array broadcasting works", "[array][bcast]") {
   // Scalar ones
   Array x(1, 1);
   x.set_ones();
@@ -105,7 +105,7 @@ TEST_CASE("Array broadcasting works", "[array]") {
   REQUIRE(z_bcast.get_ncol() == 4);
 }
 
-TEST_CASE("More intricate broadcasting", "[array]") {
+TEST_CASE("More intricate broadcasting", "[array][bcast]") {
   Array z(1, 2);
   std::vector<int> vals = {10, 10};
   z.set_vals(vals);

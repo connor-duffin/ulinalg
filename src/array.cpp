@@ -34,18 +34,21 @@ void Array::set_ones() {
   }
 }
 
-// TODO: write tests for this
 // Set the elements to have ones along the main diagonal
 void Array::eye() {
   set_zeros();
-  for (int i = 0; i < nrow; ++i) {
-    vals[i * (1 + ncol)] = 1;
+  if (ncol == 1) {
+    vals[0] = 1;
+  } else {
+    for (int i = 0; i < nrow; ++i) {
+      vals[i * (1 + ncol)] = 1;
+    }
   }
 }
 
 // Set the values of an array from a vector:
 // The values array has to be of the exact same size as expected
-void Array::set_vals(std::vector<int> &values) {
+void Array::set_vals(std::vector<int> values) {
   int size_in = values.size();
   int size_out = vals.size();
 
@@ -133,11 +136,11 @@ Array Array::operator+(Array summand) {
 
   std::cout << "Left bcasting" << nrow_out << ncol_out << std::endl;
   std::vector<int> left_idx =
-    array_detail::get_bcast_idx(nrow_left, ncol_left, nrow_out, ncol_out);
+      array_detail::get_bcast_idx(nrow_left, ncol_left, nrow_out, ncol_out);
 
   std::cout << "Right bcasting" << std::endl;
   std::vector<int> right_idx =
-    array_detail::get_bcast_idx(nrow_right, ncol_right, nrow_out, ncol_out);
+      array_detail::get_bcast_idx(nrow_right, ncol_right, nrow_out, ncol_out);
 
   // Set the return Array
   Array res(nrow_out, ncol_out);
