@@ -28,15 +28,16 @@ public:
   // Matrix multiplication
   Array mult(Array &);
 
-  // Binary operations
-  Array operator+(Array);
+  // Pretty print the array
+  void pprint();
+
+  // Binary operations via friend functions
   double *operator[](int r);
+  friend Array operator+(const Array &, const Array&);
   // Array operator-(Array);
   // Array operator*(Array);
   // Array operator/(Array);
 
-  // Pretty print the array
-  void pprint();
 };
 
 // Internally used broadcasting rules: not put inside class defn to avoid

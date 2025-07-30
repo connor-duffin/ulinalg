@@ -98,6 +98,7 @@ void Array::pprint() {
   }
 }
 
+// Matrix multiplication
 Array Array::mult(Array &m) {
   // compute A = this @ m (= this.mult(m))
   int nrow_l = nrow;
@@ -125,13 +126,17 @@ Array Array::mult(Array &m) {
   return res;
 }
 
-// TODO: add ability to do this in place if dimensions allow for it
-Array Array::operator+(Array summand) {
-  int ncol_right = summand.get_ncol();
-  int ncol_left = get_ncol();
+// Add two arrays together
+Array operator+(const Array &a1, const Array &a2) {
+  // int nrow_out = op_get_row_out(a1, a2);
+  // int ncol_out = op_get_col_out(a1, a2);
+  // std::vector<int> left_idx = get_bcast_idx(a1, nrow_out, ncol_out);
+  // std::vector<int> right_idx = get_bcast_idx(a2, nrow_out, ncol_out);
+  int ncol_right = a2.get_ncol();
+  int ncol_left = a1.get_ncol();
 
-  int nrow_right = summand.get_nrow();
-  int nrow_left = get_nrow();
+  int nrow_right = a2.get_nrow();
+  int nrow_left = a1.get_nrow();
 
   int ncol_out;
   int nrow_out;
@@ -158,18 +163,16 @@ Array Array::operator+(Array summand) {
     throw std::invalid_argument("Rows prohibit broadcasting");
   }
 
-  std::cout << "Left bcasting" << nrow_out << ncol_out << std::endl;
   std::vector<int> left_idx =
       array_detail::get_bcast_idx(nrow_left, ncol_left, nrow_out, ncol_out);
 
-  std::cout << "Right bcasting" << std::endl;
   std::vector<int> right_idx =
       array_detail::get_bcast_idx(nrow_right, ncol_right, nrow_out, ncol_out);
 
   // Set the return Array
   Array res(nrow_out, ncol_out);
   for (size_t i = 0; i < nrow_out * ncol_out; ++i) {
-    res.vals[i] = vals[left_idx[i]] + summand.vals[right_idx[i]];
+    res.vals[i] = a1.vals[left_idx[i]] + a2.vals[right_idx[i]];
   }
 
   return res;
