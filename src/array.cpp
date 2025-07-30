@@ -5,10 +5,18 @@
 #include <vector>
 
 // Array class initialization
-Array::Array(int nrows, int ncols) {
-  nrow = nrows;
-  ncol = ncols;
-  vals = std::vector<int>(nrow * ncol);
+Array::Array(int nrows, int ncols)
+    : nrow(nrows), ncol(ncols), vals(nrow * ncol) {}
+
+// Array class initialization: if values isn't the right length, recycle it so
+// that it is
+Array::Array(const std::vector<double> &values, int nrows, int ncols)
+    : nrow(nrows), ncol(ncols), vals(nrow * ncol) {
+  int n = values.size();
+  int n_out = nrow * ncol;
+  for (int i = 0; i < n_out; ++i) {
+    vals[i] = values[i % n];
+  }
 }
 
 // Get the number of rows in the array object
@@ -18,7 +26,7 @@ int Array::get_nrow() const { return nrow; }
 int Array::get_ncol() const { return ncol; }
 
 // Get the values from the object
-std::vector<int> Array::get_vals() { return vals; }
+std::vector<double> Array::get_vals() const { return vals; }
 
 // Set the elements to zeros
 void Array::set_zeros() {
@@ -48,7 +56,7 @@ void Array::eye() {
 
 // Set the values of an array from a vector:
 // The values array has to be of the exact same size as expected
-void Array::set_vals(std::vector<int> values) {
+void Array::set_vals(std::vector<double> &values) {
   int size_in = values.size();
   int size_out = vals.size();
 
@@ -57,6 +65,22 @@ void Array::set_vals(std::vector<int> values) {
   } else {
     for (int i = 0; i < size_in; ++i) {
       vals[i] = values[i];
+    }
+  }
+}
+
+// Copy input into 'this' Array
+void Array::copy(Array &input) {
+  int nrow_in = input.get_nrow();
+  int ncol_in = input.get_ncol();
+
+  if (nrow_in != nrow && ncol_in != ncol) {
+    throw std::invalid_argument("Input dimensions do not match: can't copy");
+  } else {
+    for (int i = 0; i < nrow; ++i) {
+      for (int j = 0; j < ncol; ++j) {
+        vals[i * ncol + j] = input[i][j];
+      }
     }
   }
 }
@@ -159,7 +183,7 @@ Array Array::operator+(Array summand) {
 //
 // This works because of the way pointer arithmetic works in C++:
 // x[10] === *(x + 10) ==== *(10 + x) === 10[x] (!)
-int *Array::operator[](int r) { return &vals[r * ncol]; }
+double *Array::operator[](int r) { return &vals[r * ncol]; }
 
 Array array_detail::bcast(Array &input, int nrow, int ncol) {
   // store the number of rows/columns, and the values
@@ -172,8 +196,8 @@ Array array_detail::bcast(Array &input, int nrow, int ncol) {
     // initialize this input array
     Array res(nrow, ncol);
 
-    std::vector<int> input_vals = input.get_vals();
-    std::vector<int> input_val_vector(nrow * ncol);
+    std::vector<double> input_vals = input.get_vals();
+    std::vector<double> input_val_vector(nrow * ncol);
     std::vector<int> idx_bcast = get_bcast_idx(nrow_in, ncol_in, nrow, ncol);
 
     for (auto i = 0; i < input_val_vector.size(); ++i) {
