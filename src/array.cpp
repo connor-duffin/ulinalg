@@ -128,40 +128,10 @@ Array Array::mult(Array &m) {
 
 // Add two arrays together
 Array operator+(const Array &a1, const Array &a2) {
-  // int nrow_out = op_get_row_out(a1, a2);
-  // int ncol_out = op_get_col_out(a1, a2);
-  // std::vector<int> left_idx = get_bcast_idx(a1, nrow_out, ncol_out);
-  // std::vector<int> right_idx = get_bcast_idx(a2, nrow_out, ncol_out);
-  int ncol_right = a2.get_ncol();
-  int ncol_left = a1.get_ncol();
-
-  int nrow_right = a2.get_nrow();
-  int nrow_left = a1.get_nrow();
-
-  int ncol_out;
-  int nrow_out;
-
-  // Get the output columns
-  if (ncol_right == ncol_left) {
-    ncol_out = ncol_right;
-  } else if (ncol_left == 1) {
-    ncol_out = ncol_right;
-  } else if (ncol_right == 1) {
-    ncol_out = ncol_left;
-  } else {
-    throw std::invalid_argument("Columns prohibit broadcasting");
-  }
-
-  // Get the output rows
-  if (nrow_right == nrow_left) {
-    nrow_out = nrow_right;
-  } else if (nrow_left == 1) {
-    nrow_out = nrow_right;
-  } else if (nrow_right == 1) {
-    nrow_out = nrow_left;
-  } else {
-    throw std::invalid_argument("Rows prohibit broadcasting");
-  }
+  // Go from right to left as in numpy --- doesn't really matter in terms of
+  // function calls but it is easier to maintain consistency
+  int ncol_out = array_detail::get_op_ncol_out(a1, a2);
+  int nrow_out = array_detail::get_op_nrow_out(a1, a2);
 
   std::vector<int> left_idx =
       array_detail::get_bcast_idx(a1, nrow_out, ncol_out);
@@ -231,4 +201,46 @@ std::vector<int> array_detail::get_bcast_idx(const Array &a, int nrow_out,
   }
 
   return idx;
+}
+
+int array_detail::get_op_ncol_out(const Array &a1, const Array &a2) {
+  // Initialize return value
+  int ncol_out(1);
+
+  // Get the output columns
+  int ncol_right = a2.get_ncol();
+  int ncol_left = a1.get_ncol();
+
+  if (ncol_right == ncol_left) {
+    ncol_out = ncol_right;
+  } else if (ncol_left == 1) {
+    ncol_out = ncol_right;
+  } else if (ncol_right == 1) {
+    ncol_out = ncol_left;
+  } else {
+    throw std::invalid_argument("Columns prohibit broadcasting");
+  }
+
+  return ncol_out;
+}
+
+int array_detail::get_op_nrow_out(const Array &a1, const Array &a2) {
+  // Initialize return value
+  int nrow_out(1);
+
+  // Get the output rows
+  int nrow_right = a2.get_nrow();
+  int nrow_left = a1.get_nrow();
+
+  if (nrow_right == nrow_left) {
+    nrow_out = nrow_right;
+  } else if (nrow_left == 1) {
+    nrow_out = nrow_right;
+  } else if (nrow_right == 1) {
+    nrow_out = nrow_left;
+  } else {
+    throw std::invalid_argument("Rows prohibit broadcasting");
+  }
+
+  return nrow_out;
 }

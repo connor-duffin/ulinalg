@@ -33,11 +33,10 @@ public:
 
   // Binary operations via friend functions
   double *operator[](int r);
-  friend Array operator+(const Array &, const Array&);
+  friend Array operator+(const Array &, const Array &);
+  // friend Array operator*(const Array &, const Array &);
   // Array operator-(Array);
-  // Array operator*(Array);
   // Array operator/(Array);
-
 };
 
 // Internally used broadcasting rules: not put inside class defn to avoid
@@ -45,6 +44,8 @@ public:
 namespace array_detail {
 Array bcast(Array &input, int nrow, int ncol);
 std::vector<int> get_bcast_idx(const Array &, int nrow_out, int ncol_out);
+int get_op_nrow_out(const Array &, const Array &);
+int get_op_ncol_out(const Array &, const Array &);
 } // namespace array_detail
 
 #endif
