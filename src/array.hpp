@@ -44,8 +44,7 @@ public:
 // namespace pollution
 namespace array_detail {
 Array bcast(Array &input, int nrow, int ncol);
-std::vector<int> get_bcast_idx(int nrow_in, int ncol_in, int nrow_out,
-                               int ncol_out);
+std::vector<int> get_bcast_idx(const Array &, int nrow_out, int ncol_out);
 } // namespace array_detail
 
 #endif

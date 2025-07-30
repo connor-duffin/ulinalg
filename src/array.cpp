@@ -164,10 +164,10 @@ Array operator+(const Array &a1, const Array &a2) {
   }
 
   std::vector<int> left_idx =
-      array_detail::get_bcast_idx(nrow_left, ncol_left, nrow_out, ncol_out);
+      array_detail::get_bcast_idx(a1, nrow_out, ncol_out);
 
   std::vector<int> right_idx =
-      array_detail::get_bcast_idx(nrow_right, ncol_right, nrow_out, ncol_out);
+      array_detail::get_bcast_idx(a2, nrow_out, ncol_out);
 
   // Set the return Array
   Array res(nrow_out, ncol_out);
@@ -188,32 +188,26 @@ Array operator+(const Array &a1, const Array &a2) {
 // x[10] === *(x + 10) ==== *(10 + x) === 10[x] (!)
 double *Array::operator[](int r) { return &vals[r * ncol]; }
 
+// Take an array and broadcast it into a new Array
 Array array_detail::bcast(Array &input, int nrow, int ncol) {
-  // store the number of rows/columns, and the values
-  int nrow_in = input.get_nrow();
-  int ncol_in = input.get_ncol();
+  std::vector<double> input_vals = input.get_vals();
+  std::vector<double> input_val_vector(nrow * ncol);
+  std::vector<int> idx_bcast = get_bcast_idx(input, nrow, ncol);
 
-  if (nrow_in == nrow && ncol_in == ncol) {
-    return input;
-  } else {
-    // initialize this input array
-    Array res(nrow, ncol);
-
-    std::vector<double> input_vals = input.get_vals();
-    std::vector<double> input_val_vector(nrow * ncol);
-    std::vector<int> idx_bcast = get_bcast_idx(nrow_in, ncol_in, nrow, ncol);
-
-    for (auto i = 0; i < input_val_vector.size(); ++i) {
-      input_val_vector[i] = input_vals[idx_bcast[i]];
-    }
-    res.set_vals(input_val_vector);
-
-    return res;
+  for (auto i = 0; i < input_val_vector.size(); ++i) {
+    input_val_vector[i] = input_vals[idx_bcast[i]];
   }
+
+  // Initialize the output object
+  Array res(input_val_vector, nrow, ncol);
+
+  return res;
 }
 
-std::vector<int> array_detail::get_bcast_idx(int nrow_in, int ncol_in,
-                                             int nrow_out, int ncol_out) {
+std::vector<int> array_detail::get_bcast_idx(const Array &a, int nrow_out,
+                                             int ncol_out) {
+  int nrow_in = a.get_nrow();
+  int ncol_in = a.get_ncol();
   int n_elements = nrow_out * ncol_out;
   std::vector<int> idx(n_elements);
   if (nrow_in == nrow_out && ncol_in == ncol_out) {
