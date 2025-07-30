@@ -161,6 +161,35 @@ TEST_CASE("Can copy between array objects", "[array][copy]") {
   REQUIRE(d_vals == d_vals_true);
 }
 
+TEST_CASE("Array multiplication works: 2x2", "[array][mult]") {
+  std::vector<double> vals = {1, 2, 3, 4};
+  Array a(vals, 2, 2);
+  Array a_squared = a * a;
+  std::vector<double> a_squared_vals = {1, 4, 9, 16};
+  REQUIRE(a_squared.get_vals() == a_squared_vals);
+}
+
+TEST_CASE("Array multiplication works with 2x3 * 1x3", "[array][mult]") {
+    std::vector<double> a_vals = {1, 2, 3, 4, 5, 6};
+    std::vector<double> b_vals = {5, 10, 15};
+    Array a(a_vals, 2, 3);
+    Array b(b_vals, 1, 3);
+    Array ab = a * b;
+
+    std::vector<double> vals = {5, 20, 45, 20, 50, 90};
+    REQUIRE(ab.get_vals() == vals);
+}
+
+TEST_CASE("Array multiplication works: 4x1 * 1x4", "[array][mult]") {
+  std::vector<double> vals = {1, 2, 3, 4};
+  Array a_long(vals, 4, 1);
+  Array a_wide(vals, 1, 4);
+  Array a_mult = a_long * a_wide;
+  std::vector<double> a_true = {1, 2, 3, 4, 2, 4, 6, 8,
+                                3, 6, 9, 12, 4, 8, 12, 16};
+  REQUIRE(a_mult.get_vals() == a_true);
+}
+
 TEST_CASE("Matrix multiplication works as expected", "[array][mult]") {
   Array u(2, 4);
   u.set_ones();

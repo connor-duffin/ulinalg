@@ -148,6 +148,28 @@ Array operator+(const Array &a1, const Array &a2) {
   return res;
 }
 
+// Multiply two arrays
+Array operator*(const Array &a1, const Array &a2) {
+  // Go from right to left as in numpy --- doesn't really matter in terms of
+  // function calls but it is easier to maintain consistency
+  int ncol_out = array_detail::get_op_ncol_out(a1, a2);
+  int nrow_out = array_detail::get_op_nrow_out(a1, a2);
+
+  std::vector<int> left_idx =
+      array_detail::get_bcast_idx(a1, nrow_out, ncol_out);
+
+  std::vector<int> right_idx =
+      array_detail::get_bcast_idx(a2, nrow_out, ncol_out);
+
+  // Set the return Array
+  Array res(nrow_out, ncol_out);
+  for (size_t i = 0; i < nrow_out * ncol_out; ++i) {
+    res.vals[i] = a1.vals[left_idx[i]] * a2.vals[right_idx[i]];
+  }
+
+  return res;
+}
+
 // Allow for indexing operations e.g. a[1][2]
 // It works by first returning a pointer which starts at the specified row; we
 // the slice this row as required, to get our value. Arithmetically:

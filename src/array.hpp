@@ -34,7 +34,7 @@ public:
   // Binary operations via friend functions
   double *operator[](int r);
   friend Array operator+(const Array &, const Array &);
-  // friend Array operator*(const Array &, const Array &);
+  friend Array operator*(const Array &, const Array &);
   // Array operator-(Array);
   // Array operator/(Array);
 };
