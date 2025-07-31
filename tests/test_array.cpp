@@ -170,14 +170,14 @@ TEST_CASE("Array multiplication works: 2x2", "[array][mult]") {
 }
 
 TEST_CASE("Array multiplication works with 2x3 * 1x3", "[array][mult]") {
-    std::vector<double> a_vals = {1, 2, 3, 4, 5, 6};
-    std::vector<double> b_vals = {5, 10, 15};
-    Array a(a_vals, 2, 3);
-    Array b(b_vals, 1, 3);
-    Array ab = a * b;
+  std::vector<double> a_vals = {1, 2, 3, 4, 5, 6};
+  std::vector<double> b_vals = {5, 10, 15};
+  Array a(a_vals, 2, 3);
+  Array b(b_vals, 1, 3);
+  Array ab = a * b;
 
-    std::vector<double> vals = {5, 20, 45, 20, 50, 90};
-    REQUIRE(ab.get_vals() == vals);
+  std::vector<double> vals = {5, 20, 45, 20, 50, 90};
+  REQUIRE(ab.get_vals() == vals);
 }
 
 TEST_CASE("Array multiplication works: 4x1 * 1x4", "[array][mult]") {
@@ -185,9 +185,26 @@ TEST_CASE("Array multiplication works: 4x1 * 1x4", "[array][mult]") {
   Array a_long(vals, 4, 1);
   Array a_wide(vals, 1, 4);
   Array a_mult = a_long * a_wide;
-  std::vector<double> a_true = {1, 2, 3, 4, 2, 4, 6, 8,
+  std::vector<double> a_true = {1, 2, 3, 4,  2, 4, 6,  8,
                                 3, 6, 9, 12, 4, 8, 12, 16};
   REQUIRE(a_mult.get_vals() == a_true);
+}
+
+TEST_CASE("Array subtraction works: 2x2", "[array][subtract]") {
+  std::vector<double> vals = {1, 2, 3, 4};
+  Array a(vals, 2, 2);
+  Array zero = a - a;
+  std::vector<double> zeros = {0, 0, 0, 0};
+  REQUIRE(zero.get_vals() == zeros);
+}
+
+TEST_CASE("Array division works: 2x2", "[array][division]") {
+  std::vector<double> vals = {1, 2, 3, 4};
+  Array a(vals, 2, 2);
+  Array one = a / a;
+
+  std::vector<double> ones = {1, 1, 1, 1};
+  REQUIRE(one.get_vals() == ones);
 }
 
 TEST_CASE("Matrix multiplication works as expected", "[array][mult]") {

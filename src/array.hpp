@@ -32,11 +32,13 @@ public:
   void pprint();
 
   // Binary operations via friend functions
+  // TODO: Refactor to use member functions where possible
+  // TODO: Also implement with different signatures (e.g. double, Array)
   double *operator[](int r);
   friend Array operator+(const Array &, const Array &);
   friend Array operator*(const Array &, const Array &);
-  // Array operator-(Array);
-  // Array operator/(Array);
+  friend Array operator-(const Array &, const Array &);
+  friend Array operator/(const Array &, const Array &);
 };
 
 // Internally used broadcasting rules: not put inside class defn to avoid
