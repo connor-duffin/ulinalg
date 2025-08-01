@@ -13,6 +13,7 @@ endif()
 
 # compile the array library
 add_library(array STATIC src/array.cpp src/array.hpp)
+add_library(decomp STATIC src/decomp.cpp src/decomp.hpp)
 
 # add the tests to be built
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
