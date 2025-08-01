@@ -7,7 +7,6 @@ A small C++ library for array operations. This is an educational library designe
 - Basic array operations and matrix algebra.
 - LU decomposition for square `Array` objects.
 - Cholesky decomposition for square `Array` objects.
-- Singular Value Decomposition.
 
 ## Build
 
