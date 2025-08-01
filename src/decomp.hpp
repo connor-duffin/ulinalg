@@ -15,28 +15,28 @@ public:
   LUDecomp(Array &, int);
   void decompose();
   Array solve(Array &);
-  Array invert(Array &);
 
-  // simple access metadata functions
+  // Simple access metadata functions
   int get_nrows() const;
   int get_ncols() const;
   std::vector<double> get_vals();
 };
 
-/*
- * class Cholesky {
- * private:
- *   int n;
- *   Array M;
- *   Array fact;
- *
- * public:
- *   // Factorize M -> fact
- *   Cholesky(Array &M);
- *   void decompose();
- *   Array solve(Array &b);
- *   Array invert();
- * };
- */
+// class Cholesky {
+// private:
+//   int n;
+//   Array M;
+//
+// public:
+//   // All operations in-place
+//   Cholesky(Array &M);
+//   void decompose();
+//   Array solve(Array &b);
+//
+//  // Simple access metadata functions
+//  int get_nrows() const;
+//  int get_ncols() const;
+//  std::vector<double> get_vals();
+// };
 
 #endif
