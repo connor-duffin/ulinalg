@@ -4,10 +4,21 @@
 #include "array.hpp"
 #include <vector>
 
-class LUDecomp {
-private:
+class Decomp {
+protected:
   int n;
   Array M;
+
+public:
+  Decomp(Array &, int);
+
+  int get_nrows() const;
+  int get_ncols() const;
+  std::vector<double> get_vals();
+};
+
+class LUDecomp : public Decomp {
+private:
   std::vector<int> p;
 
 public:
@@ -15,28 +26,13 @@ public:
   LUDecomp(Array &, int);
   void decompose();
   Array solve(Array &);
-
-  // Simple access metadata functions
-  int get_nrows() const;
-  int get_ncols() const;
-  std::vector<double> get_vals();
 };
 
-// class Cholesky {
-// private:
-//   int n;
-//   Array M;
-//
-// public:
-//   // All operations in-place
-//   Cholesky(Array &M);
-//   void decompose();
-//   Array solve(Array &b);
-//
-//  // Simple access metadata functions
-//  int get_nrows() const;
-//  int get_ncols() const;
-//  std::vector<double> get_vals();
-// };
+class Cholesky : public Decomp {
+public:
+  Cholesky(Array &, int);
+  void decompose();
+  Array solve(Array &);
+};
 
 #endif

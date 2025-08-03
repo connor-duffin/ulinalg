@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <vector>
 
-LUDecomp::LUDecomp(Array &A, int dim) : n(dim), p(dim), M(dim, dim) {
+Decomp::Decomp(Array &A, int dim) : n(dim), M(dim, dim) {
   // Check that dimensions are square
   int nrow = M.get_nrow();
   int ncol = M.get_ncol();
@@ -18,17 +18,20 @@ LUDecomp::LUDecomp(Array &A, int dim) : n(dim), p(dim), M(dim, dim) {
   // If dimensions are OK, initialize the M matrix
   std::vector<double> vals = A.get_vals();
   M.set_vals(vals);
+}
 
+int Decomp::get_nrows() const { return n; }
+
+int Decomp::get_ncols() const { return n; }
+
+std::vector<double> Decomp::get_vals() { return M.get_vals(); }
+
+// Only need to initialize the pivot vector
+LUDecomp::LUDecomp(Array &A, int dim) : Decomp(A, dim), p(dim) {
   for (int i = 0; i < dim; ++i) {
     p[i] = i;
   }
 }
-
-int LUDecomp::get_nrows() const { return n; }
-
-int LUDecomp::get_ncols() const { return n; }
-
-std::vector<double> LUDecomp::get_vals() { return M.get_vals(); }
 
 // In-place LU decomposition with partial (column) pivoting
 void LUDecomp::decompose() {
@@ -82,7 +85,7 @@ void LUDecomp::decompose() {
 
 // Solve using the LU decomposition
 Array LUDecomp::solve(Array &b) {
-    // Check input dimension align
+  // Check input dimension align
   int len_b = b.get_nrow();
   int width_b = b.get_ncol();
   if (len_b != n || width_b != 1) {
@@ -109,6 +112,54 @@ Array LUDecomp::solve(Array &b) {
       x[i][0] -= M[i][j] * x[j][0];
     }
     x[i][0] /= M[i][i];
+  }
+
+  return x;
+}
+
+Cholesky::Cholesky(Array &A, int dim) : Decomp(A, dim) {}
+
+// In-place Cholesky decomposition, returning upper-triangular matrix
+void Cholesky::decompose() {
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j <= i; ++j) {
+      double sum = 0;
+
+      for (int k = 0; k < j; k++) {
+        sum += M[i][k] * M[j][k];
+      }
+
+      if (i == j) {
+        M[i][j] = std::sqrt(M[i][i] - sum);
+      } else {
+        M[i][j] = (1.0 / M[j][j] * (M[i][j] - sum));
+      }
+    }
+  }
+}
+
+Array Cholesky::solve(Array &b) {
+  // Initialize output array
+  std::vector<double> b_vals = b.get_vals();
+  Array x(b_vals, n, 1);
+
+  // First forward solve
+  x[0][0] /= M[0][0];
+  for (int i = 1; i < n; ++i) {
+    for (int j = 0; j < i; ++j) {
+      x[i][0] -= M[i][j] * x[j][0];
+    }
+    x[i][0] /= M[i][i];
+  }
+
+  // Then backsolve (via transposed M) to finish up
+  x[n - 1][0] /= M[n - 1][n - 1];
+  for (int i = n - 2; i >= 0; --i) {
+    for (int j = n - 1; j > i; --j) {
+      x[i][0] -= M[j][i] * x[j][0];
+    }
+    x[i][0] /= M[i][i];
+    std::cout << x[i][0] << std::endl;
   }
 
   return x;
