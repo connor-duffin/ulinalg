@@ -2,6 +2,8 @@
 
 A small C++ library for array operations. This is an educational library designed to mimic the operations of popular 2D array packages (`numpy`, base `R`, etc) to better understand what operations happen under the hood.
 
+Included are additionally solvers for square arrays (matrices) via both the LU and Cholesky decompositions.
+
 ## Features
 
 - Basic array operations (including broadcasting) and matrix algebra.
