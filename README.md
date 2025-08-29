@@ -30,3 +30,7 @@ cmake --build build
 cd build
 ctest
 ```
+
+## Licence
+
+MIT - Copyright Connor Duffin.
